@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap");
+
+.start_menu {
+  position: fixed;
+  inset: 0;
+
+  background-image: url("../../public/start_menu.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  font-family: "Luckiest Guy", cursive;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+  font-size: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.start_button {
+  width: 320px;
+  height: 96px;
+
+  border-radius: 999px;
+
+  background: radial-gradient(
+      circle at top,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0) 60%
+    ),
+    linear-gradient(180deg, #7fe9ff, #3bb5ff);
+
+  border: 2px solid rgba(255, 255, 255, 0.6);
+
+  box-shadow: 0 8px 20px rgba(0, 180, 255, 0.35),
+    inset 0 4px 6px rgba(255, 255, 255, 0.4),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.15);
+
+  color: white;
+  font-size: 2.4rem;
+  font-family: "Luckiest Guy", cursive;
+
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 20px;
+}
+
+.start_button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 180, 255, 0.5),
+    inset 0 4px 6px rgba(255, 255, 255, 0.5);
+}
+
+.start_button:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 14px rgba(0, 180, 255, 0.3),
+    inset 0 3px 5px rgba(0, 0, 0, 0.25);
+}
