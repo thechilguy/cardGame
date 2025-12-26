@@ -3,34 +3,29 @@ import { Card } from "../game/state/gameTypes";
 type Props = {
   hand: Card[];
   energy: number;
-  onPlayCard: (id: string) => void;
 };
 
-export default function HandView({ hand, energy, onPlayCard }: Props) {
+export default function HandView({ hand, energy }: Props) {
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 16,
-        justifyContent: "center",
-        paddingTop: 20,
-      }}
-    >
+    <div style={{ display: "flex", gap: 16 }}>
       {hand.map((card) => {
         const disabled = card.cost > energy;
 
         return (
           <div
             key={card.id}
-            onClick={() => !disabled && onPlayCard(card.id)}
+            draggable={!disabled}
+            onDragStart={(e) => {
+              e.dataTransfer.setData("cardId", card.id);
+            }}
             style={{
               width: 140,
               height: 200,
-              background: disabled ? "#333" : "#111",
+              background: "#111",
+              opacity: disabled ? 0.4 : 1,
               borderRadius: 12,
               padding: 12,
-              cursor: disabled ? "not-allowed" : "pointer",
-              opacity: disabled ? 0.5 : 1,
+              cursor: disabled ? "not-allowed" : "grab",
             }}
           >
             <strong>{card.name}</strong>
