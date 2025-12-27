@@ -1,0 +1,32 @@
+/* ===== HAND CONTAINER ===== */
+.hand {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  height: 300px;
+  padding-top: 20px;
+  pointer-events: auto;
+  border: 1px solid red;
+  /* ❗ важливо для drag */
+}
+
+/* ===== CARD ===== */
+.card {
+  width: 140px;
+  height: 200px;
+  background: #000000;
+  border-radius: 14px;
+  padding: 12px;
+  color: white;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.15s ease;
+}
+
+/* ❗ БРАУЗЕРНИЙ ФІКС */
+
+/* disabled */
+.card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

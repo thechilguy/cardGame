@@ -1,31 +1,39 @@
 import { Card } from "../game/state/gameTypes";
+import EnergyView from "./EnergyView";
+import "./HandView.css";
 
 type Props = {
   hand: Card[];
   energy: number;
+  maxEnergy: number;
 };
 
-export default function HandView({ hand, energy }: Props) {
+export default function HandView({ hand, energy, maxEnergy }: Props) {
   return (
-    <div style={{ display: "flex", gap: 16 }}>
+    <div className="hand">
+      {/* ===== HUD ===== */}
+      <div className="hud">
+        <EnergyView current={energy} max={maxEnergy} />
+      </div>
+
+      {/* ===== CARDS ===== */}
       {hand.map((card) => {
         const disabled = card.cost > energy;
 
         return (
           <div
             key={card.id}
+            data-card-id={card.id}
             draggable={!disabled}
+            className={`card ${disabled ? "disabled" : ""}`}
             onDragStart={(e) => {
+              if (disabled) {
+                e.preventDefault();
+                return;
+              }
+
               e.dataTransfer.setData("cardId", card.id);
-            }}
-            style={{
-              width: 140,
-              height: 200,
-              background: "#111",
-              opacity: disabled ? 0.4 : 1,
-              borderRadius: 12,
-              padding: 12,
-              cursor: disabled ? "not-allowed" : "grab",
+              e.dataTransfer.effectAllowed = "move";
             }}
           >
             <strong>{card.name}</strong>

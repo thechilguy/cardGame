@@ -1,0 +1,55 @@
+.entity {
+  width: 220px;
+  height: 300px;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* ===== PLAYER ===== */
+.entity.player {
+  background: linear-gradient(180deg, #3b82f6, #1e3a8a);
+}
+
+/* ===== ENEMY ===== */
+.entity.enemy {
+  background: linear-gradient(180deg, #ef4444, #7f1d1d);
+}
+
+/* ===== ART ===== */
+.entity-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.05);
+  filter: brightness(0.95);
+}
+
+/* ===== INFO PANEL ===== */
+.entity-info {
+  position: relative;
+  padding: 14px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+.entity-name {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.entity-hp {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+/* ===== DRAG TARGET FEEDBACK ===== */
+.entity.enemy:hover {
+  outline: 2px solid rgba(255, 255, 255, 0.2);
+}

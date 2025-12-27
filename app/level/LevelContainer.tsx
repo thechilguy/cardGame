@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { createInitialGameState } from "../game/state/gameState";
-import { GameState } from "../game/state/gameTypes";
 import { drawCards } from "../game/cards/draw.logic";
 import { playCard } from "../game/cards/play.logic";
-import PlayerView from "./PlayerView";
-import EnemyView from "./EnemyView";
+
+import { endTurn } from "../game/combat/endTurn";
+import { enemyAttack } from "../game/combat/enemyAttack";
+import { startPlayerTurn } from "../game/combat/startPlayerTurn";
+
+import EntityView from "./EntityView";
 import HandView from "./HandView";
+import FlyingCard from "./FlyingCard";
+
+import "./LevelContainer.css";
 
 type Props = {
   levelId: number;
@@ -16,127 +23,106 @@ type Props = {
 export default function LevelContainer({ levelId }: Props) {
   const [state, setState] = useState(() => createInitialGameState(levelId));
 
-  // draw стартової руки
+  const [flyingCard, setFlyingCard] = useState<{
+    id: string;
+    name: string;
+    from: DOMRect;
+    to: DOMRect;
+  } | null>(null);
+
+  const enemyRef = useRef<HTMLDivElement>(null);
+
+  // ===== START PLAYER TURN (INIT) =====
   useEffect(() => {
     setState((s) => drawCards(s, 3));
   }, []);
 
+  // ===== DROP CARD ON ENEMY =====
+  const handleDropOnEnemy = (cardId: string, cardEl: HTMLElement) => {
+    if (state.phase !== "player") return;
+    if (!enemyRef.current) return;
+
+    const card = state.hand.find((c) => c.id === cardId);
+    if (!card) return;
+
+    // ❌ якщо не вистачає енергії — не стартуємо анімацію
+    if (state.player.energy < card.cost) return;
+
+    setFlyingCard({
+      id: card.id,
+      name: card.name,
+      from: cardEl.getBoundingClientRect(),
+      to: enemyRef.current.getBoundingClientRect(),
+    });
+  };
+
+  // ===== END TURN FLOW =====
+  const handleEndTurn = () => {
+    if (state.phase !== "player") return;
+
+    // player → enemy
+    setState((s) => endTurn(s));
+
+    // enemy attack → new player turn
+    setTimeout(() => {
+      setState((s) => enemyAttack(s));
+      setState((s) => startPlayerTurn(s));
+    }, 600);
+  };
+
   return (
-    <div
-      style={{
-        height: "100vh",
-        background: "#0b0b14",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: 40,
-        color: "white",
-      }}
-    >
+    <div className="level-root">
       {/* ===== BATTLE FIELD ===== */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div className="battlefield">
         {/* PLAYER */}
-        <div
-          style={{
-            width: 180,
-            height: 260,
-            background: "#3b82f6",
-            borderRadius: 16,
-            padding: 16,
-          }}
-        >
-          <h3>Player</h3>
-          <p>HP: {state.player.hp}</p>
-          <p>
-            Energy: {state.player.energy}/{state.player.maxEnergy}
-          </p>
-          <p>Stance: {state.player.stance}</p>
-        </div>
+        <EntityView
+          variant="player"
+          name="Moon Maiden"
+          hp={state.player.hp}
+          maxHp={state.player.maxHp}
+          image="/player.png"
+        />
 
-        {/* ENEMY — DROP ZONE */}
-        <div
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            const cardId = e.dataTransfer.getData("cardId");
-            if (!cardId) return;
-
-            setState((s) => playCard(s, cardId));
-          }}
-          style={{
-            width: 180,
-            height: 260,
-            background: "#ef4444",
-            borderRadius: 16,
-            padding: 16,
-            textAlign: "center",
-          }}
-        >
-          <h3>Enemy</h3>
-          <p>
-            HP: {state.enemy.hp}/{state.enemy.maxHp}
-          </p>
-          <p style={{ opacity: 0.7, marginTop: 20 }}>Drop card here</p>
-        </div>
+        {/* ENEMY */}
+        <EntityView
+          ref={enemyRef}
+          variant="enemy"
+          name="Slime"
+          hp={state.enemy.hp}
+          maxHp={state.enemy.maxHp}
+          image="/enemy.png"
+          onDropCard={handleDropOnEnemy}
+        />
       </div>
 
       {/* ===== HAND ===== */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 16,
-          paddingTop: 20,
-        }}
-      >
-        {state.hand.map((card) => {
-          const disabled = card.cost > state.player.energy;
+      <HandView hand={state.hand} energy={state.player.energy} />
 
-          return (
-            <div
-              key={card.id}
-              draggable={!disabled}
-              onDragStart={(e) => {
-                e.dataTransfer.setData("cardId", card.id);
-              }}
-              style={{
-                width: 140,
-                height: 200,
-                background: disabled ? "#333" : "#111",
-                borderRadius: 12,
-                padding: 12,
-                cursor: disabled ? "not-allowed" : "grab",
-                opacity: disabled ? 0.5 : 1,
-              }}
-            >
-              <strong>{card.name}</strong>
-              <p>Cost: {card.cost}</p>
-              <p>DMG: {card.damage}</p>
-            </div>
-          );
-        })}
-      </div>
+      {/* ===== END TURN BUTTON ===== */}
+      {state.phase === "player" && (
+        <button className="end-turn-btn" onClick={handleEndTurn}>
+          End Turn
+        </button>
+      )}
 
-      {/* ===== END STATE ===== */}
-      {state.phase === "end" && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(0,0,0,0.7)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 48,
+      {/* ===== FLYING CARD ===== */}
+      {flyingCard && (
+        <FlyingCard
+          id={flyingCard.id}
+          name={flyingCard.name}
+          from={flyingCard.from}
+          to={flyingCard.to}
+          onFinish={(cardId) => {
+            setState((s) => playCard(s, cardId));
+            setFlyingCard(null);
           }}
-        >
-          🏆 Victory
+        />
+      )}
+
+      {/* ===== GAME END ===== */}
+      {state.phase === "end" && (
+        <div className="victory-overlay">
+          {state.enemy.hp <= 0 ? "🏆 Victory" : "💀 Defeat"}
         </div>
       )}
     </div>

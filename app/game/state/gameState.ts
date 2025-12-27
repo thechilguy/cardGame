@@ -1,4 +1,6 @@
 import { GameState } from "./gameTypes";
+import { starterDeck } from "../cards/cards.data";
+import { shuffle } from "../cards/shuffle";
 
 export function createInitialGameState(levelId: number): GameState {
   return {
@@ -19,12 +21,7 @@ export function createInitialGameState(levelId: number): GameState {
       maxHp: 30,
     },
 
-    deck: [
-      { id: "c1", name: "Strike", cost: 1, damage: 6 },
-      { id: "c2", name: "Strike", cost: 1, damage: 6 },
-      { id: "c3", name: "Strike", cost: 1, damage: 6 },
-    ],
-
+    deck: shuffle(starterDeck),
     hand: [],
     discard: [],
   };
