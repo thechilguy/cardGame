@@ -8,6 +8,8 @@ type Props = {
   maxEnergy: number;
 };
 
+const HAND_RENDER_LIMIT = 3;
+
 export default function HandView({ hand, energy, maxEnergy }: Props) {
   return (
     <div className="hand">
@@ -16,8 +18,8 @@ export default function HandView({ hand, energy, maxEnergy }: Props) {
         <EnergyView current={energy} max={maxEnergy} />
       </div>
 
-      {/* ===== CARDS ===== */}
-      {hand.map((card) => {
+      {/* ===== CARDS (LIMITED) ===== */}
+      {hand.slice(0, HAND_RENDER_LIMIT).map((card) => {
         const disabled = card.cost > energy;
 
         return (

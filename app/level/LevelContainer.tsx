@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { createInitialGameState } from "../game/state/gameState";
 import { drawCards } from "../game/cards/draw.logic";
@@ -20,8 +20,13 @@ type Props = {
   levelId: number;
 };
 
+const HAND_LIMIT = 5;
+
 export default function LevelContainer({ levelId }: Props) {
-  const [state, setState] = useState(() => createInitialGameState(levelId));
+  const [state, setState] = useState(() => {
+    const base = createInitialGameState(levelId);
+    return drawCards(base, 3);
+  });
 
   const [flyingCard, setFlyingCard] = useState<{
     id: string;
@@ -32,11 +37,6 @@ export default function LevelContainer({ levelId }: Props) {
 
   const enemyRef = useRef<HTMLDivElement>(null);
 
-  // ===== START PLAYER TURN (INIT) =====
-  useEffect(() => {
-    setState((s) => drawCards(s, 3));
-  }, []);
-
   // ===== DROP CARD ON ENEMY =====
   const handleDropOnEnemy = (cardId: string, cardEl: HTMLElement) => {
     if (state.phase !== "player") return;
@@ -45,7 +45,6 @@ export default function LevelContainer({ levelId }: Props) {
     const card = state.hand.find((c) => c.id === cardId);
     if (!card) return;
 
-    // ❌ якщо не вистачає енергії — не стартуємо анімацію
     if (state.player.energy < card.cost) return;
 
     setFlyingCard({
@@ -60,21 +59,19 @@ export default function LevelContainer({ levelId }: Props) {
   const handleEndTurn = () => {
     if (state.phase !== "player") return;
 
-    // player → enemy
     setState((s) => endTurn(s));
 
-    // enemy attack → new player turn
     setTimeout(() => {
-      setState((s) => enemyAttack(s));
-      setState((s) => startPlayerTurn(s));
+      setState((s) => startPlayerTurn(enemyAttack(s)));
     }, 600);
   };
 
+  // ✅ UI-guard: перед рендером обмежуємо кількість карт
+  const handForRender = state.hand.slice(0, HAND_LIMIT);
+
   return (
     <div className="level-root">
-      {/* ===== BATTLE FIELD ===== */}
       <div className="battlefield">
-        {/* PLAYER */}
         <EntityView
           variant="player"
           name="Moon Maiden"
@@ -83,7 +80,6 @@ export default function LevelContainer({ levelId }: Props) {
           image="/player.png"
         />
 
-        {/* ENEMY */}
         <EntityView
           ref={enemyRef}
           variant="enemy"
@@ -95,17 +91,19 @@ export default function LevelContainer({ levelId }: Props) {
         />
       </div>
 
-      {/* ===== HAND ===== */}
-      <HandView hand={state.hand} energy={state.player.energy} />
+      {/* ✅ РЕНДЕРИМО ТІЛЬКИ ОБМЕЖЕНУ РУКУ */}
+      <HandView
+        hand={handForRender}
+        energy={state.player.energy}
+        maxEnergy={state.player.maxEnergy}
+      />
 
-      {/* ===== END TURN BUTTON ===== */}
       {state.phase === "player" && (
         <button className="end-turn-btn" onClick={handleEndTurn}>
           End Turn
         </button>
       )}
 
-      {/* ===== FLYING CARD ===== */}
       {flyingCard && (
         <FlyingCard
           id={flyingCard.id}
@@ -119,7 +117,6 @@ export default function LevelContainer({ levelId }: Props) {
         />
       )}
 
-      {/* ===== GAME END ===== */}
       {state.phase === "end" && (
         <div className="victory-overlay">
           {state.enemy.hp <= 0 ? "🏆 Victory" : "💀 Defeat"}

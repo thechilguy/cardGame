@@ -6,7 +6,7 @@
   height: 300px;
   padding-top: 20px;
   pointer-events: auto;
-  border: 1px solid red;
+
   /* ❗ важливо для drag */
 }
 
