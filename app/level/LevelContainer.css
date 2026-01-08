@@ -1,0 +1,47 @@
+.level-root {
+  height: 100vh;
+  background: #0b0b14;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.battlefield {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 1800px;
+}
+
+.flying-card {
+  position: fixed;
+  background: #111;
+  border-radius: 12px;
+  padding: 12px;
+  pointer-events: none;
+  animation: fly-card 0.35s ease-out forwards;
+  z-index: 1000;
+}
+
+@keyframes fly-card {
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.7);
+    opacity: 0;
+  }
+}
+
+.victory-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+}
